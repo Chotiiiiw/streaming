@@ -1,4 +1,46 @@
 services:
+  kafka-init:
+    image: apache/kafka:latest
+    container_name: kafka-init
+
+    depends_on:
+      - kafka
+
+    entrypoint:
+      - /bin/bash
+      - -c
+
+    command:
+      - |
+        set -e
+
+        echo "Waiting for Kafka..."
+
+        until /opt/kafka/bin/kafka-topics.sh \
+          --bootstrap-server kafka:29092 \
+          --list > /dev/null 2>&1
+        do
+          sleep 2
+        done
+
+        echo "Kafka is ready. Creating topics..."
+
+        for topic in \
+          transactions_raw \
+          clean_transactions \
+          fraud_alerts \
+          transactions_dlq
+        do
+          /opt/kafka/bin/kafka-topics.sh \
+            --bootstrap-server kafka:29092 \
+            --create \
+            --if-not-exists \
+            --topic "$$topic" \
+            --partitions 1 \
+            --replication-factor 1
+        done
+
+        echo "Topic initialization complete."
 
   kafka:
     image: apache/kafka:latest
