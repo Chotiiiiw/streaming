@@ -24,13 +24,19 @@ def parse_args():
         default=1.0,
         help="Seconds between transactions.",
     )
+    parser.add_argument(
+        "--users",
+        type=int,
+        default=5,
+        help="Number of unique users to generate.",
+    )
     return parser.parse_args()
 
 
-def create_transaction(index):
+def create_transaction(index, user_count):
     return {
         "transaction_id": f"tx_{uuid.uuid4().hex}",
-        "user_id": f"user_{index}",
+        "user_id": f"user_{index % user_count}",
         "amount": (index + 1) * 100,
         "country": "TH",
         "event_time": datetime.now(timezone.utc)
@@ -48,6 +54,8 @@ def main():
     if args.interval < 0:
         raise ValueError("--interval cannot be negative")
 
+    if args.users <= 0:
+        raise ValueError("--users must be greater that zero")
     bootstrap_servers = os.getenv(
         "KAFKA_BOOTSTRAP_SERVERS",
         "localhost:9092",
@@ -63,11 +71,11 @@ def main():
 
     try:
         for index in range(args.count):
-            transaction = create_transaction(index)
-
+            transaction = create_transaction(index, args.users)
+            message_key = transaction["user_id"]
             metadata = producer.send(
                 topic="transactions_raw",
-                key=transaction["transaction_id"],
+                key=message_key,
                 value=transaction,
             ).get(timeout=10)
 
@@ -77,6 +85,7 @@ def main():
                 f"partition={metadata.partition}, "
                 f"offset={metadata.offset}, "
                 f"transaction={transaction}"
+                f"key={message_key}"
             )
 
             time.sleep(args.interval)
