@@ -94,6 +94,7 @@ services:
     volumes:
       - ./flink/lib/flink-sql-connector-kafka-5.0.0-2.2.jar:/opt/flink/lib/flink-sql-connector-kafka-5.0.0-2.2.jar:ro
       - ./flink/sql:/opt/flink/sql:ro
+      - ./flink-app/target:/opt/flink/usrlib:ro
 
 
   taskmanager:

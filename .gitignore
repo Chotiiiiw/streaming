@@ -1,2 +1,24 @@
 flink/lib/*.jar
 .venv
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+
+# Downloaded Flink connectors
+flink/lib/*.jar
+
+# Maven build output
+**/target/
+
+# Editors
+.vscode/
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+
+# mac
+.DS_Store
