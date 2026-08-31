@@ -40,7 +40,7 @@ def create_transaction(index, user_count):
         "amount": (index + 1) * 100,
         "country": "TH",
         "event_time": datetime.now(timezone.utc)
-        .isoformat()
+        .isoformat(timespec="milliseconds")
         .replace("+00:00", "Z"),
     }
 
