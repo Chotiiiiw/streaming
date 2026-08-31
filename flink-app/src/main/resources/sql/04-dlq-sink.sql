@@ -7,8 +7,9 @@ CREATE TABLE transactions_dlq_sink (
     `error_reason` STRING
 ) WITH (
     'connector' = 'kafka',
-    'topic' = 'transactions_dlq',
-    'properties.bootstrap.servers' = 'kafka:29092',
+    'topic' = '{{TRANSACTIONS_DLQ_TOPIC}}',
+    'properties.bootstrap.servers' = '{{KAFKA_BOOTSTRAP_SERVERS}}',
+    'properties.security.protocol' = '{{KAFKA_SECURITY_PROTOCOL}}',
     'format' = 'json',
     'json.timestamp-format.standard' = 'ISO-8601'
 );

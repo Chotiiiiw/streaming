@@ -18,6 +18,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.apache.flink.table.api.Expressions.$;
 
@@ -43,16 +46,35 @@ public final class TransactionRoutingJob {
                 );
         tableEnvironment.getConfig().setLocalTimeZone(ZoneId.of("UTC"));
 
+        ApplicationConfig applicationConfig =
+                ApplicationConfig.fromEnvironment();
+
         System.out.println("Transaction routing job initialized successfully.");
         System.out.println(
                 "Flink parallelism: "
                         + executionEnvironment.getParallelism()
         );
 
-        executeSqlResource(tableEnvironment, "sql/01-source.sql");
-        executeSqlResource(tableEnvironment, "sql/02-clean-sink.sql");
-        executeSqlResource(tableEnvironment, "sql/03-fraud-sink.sql");
-        executeSqlResource(tableEnvironment, "sql/04-dlq-sink.sql");
+        executeSqlResource(
+                tableEnvironment,
+                "sql/01-source.sql",
+                applicationConfig
+        );
+        executeSqlResource(
+                tableEnvironment,
+                "sql/02-clean-sink.sql",
+                applicationConfig
+        );
+        executeSqlResource(
+                tableEnvironment,
+                "sql/03-fraud-sink.sql",
+                applicationConfig
+        );
+        executeSqlResource(
+                tableEnvironment,
+                "sql/04-dlq-sink.sql",
+                applicationConfig
+        );
 
         Table rawTransactions = tableEnvironment
                 .from("transactions_raw_source")
@@ -164,12 +186,73 @@ public final class TransactionRoutingJob {
 
     private static TableResult executeSqlResource(
             StreamTableEnvironment tableEnvironment,
-            String resourcePath
+            String resourcePath,
+            ApplicationConfig applicationConfig
     ) throws IOException {
-        String sql = readSqlResource(resourcePath);
+        String sqlTemplate = readSqlResource(resourcePath);
+        String renderedSql = renderSqlTemplate(
+                sqlTemplate,
+                applicationConfig,
+                resourcePath
+        );
 
         System.out.println("Executing SQL resource: " + resourcePath);
-        return tableEnvironment.executeSql(sql);
+        return tableEnvironment.executeSql(renderedSql);
+    }
+
+    private static String renderSqlTemplate(
+            String sqlTemplate,
+            ApplicationConfig config,
+            String resourcePath
+    ) {
+        Map<String, String> replacements = Map.of(
+                "KAFKA_BOOTSTRAP_SERVERS",
+                config.bootstrapServers(),
+                "TRANSACTIONS_RAW_TOPIC",
+                config.transactionsRawTopic(),
+                "CLEAN_TRANSACTIONS_TOPIC",
+                config.cleanTransactionsTopic(),
+                "FRAUD_ALERTS_TOPIC",
+                config.fraudAlertsTopic(),
+                "TRANSACTIONS_DLQ_TOPIC",
+                config.transactionsDlqTopic(),
+                "KAFKA_GROUP_ID",
+                config.groupId(),
+                "KAFKA_STARTUP_MODE",
+                config.startupMode(),
+                "KAFKA_SECURITY_PROTOCOL",
+                config.securityProtocol()
+        );
+
+        String renderedSql = sqlTemplate;
+
+        for (Map.Entry<String, String> replacement
+                : replacements.entrySet()) {
+            String placeholder = "{{" + replacement.getKey() + "}}";
+            renderedSql = renderedSql.replace(
+                    placeholder,
+                    escapeSqlValue(replacement.getValue())
+            );
+        }
+
+        Matcher unresolvedPlaceholder = Pattern
+                .compile("\\{\\{[^{}]+}}")
+                .matcher(renderedSql);
+
+        if (unresolvedPlaceholder.find()) {
+            throw new IllegalArgumentException(
+                    "Unresolved SQL placeholder "
+                            + unresolvedPlaceholder.group()
+                            + " in "
+                            + resourcePath
+            );
+        }
+
+        return renderedSql;
+    }
+
+    private static String escapeSqlValue(String value) {
+        return value.replace("'", "''");
     }
 
     private static String readSqlResource(String resourcePath)

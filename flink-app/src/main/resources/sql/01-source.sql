@@ -8,10 +8,11 @@ CREATE TABLE transactions_raw_source (
     WATERMARK FOR `event_time` AS `event_time` - INTERVAL '5' SECOND
 ) WITH (
     'connector' = 'kafka',
-    'topic' = 'transactions_raw',
-    'properties.bootstrap.servers' = 'kafka:29092',
-    'properties.group.id' = 'transaction-router-v1',
-    'scan.startup.mode' = 'latest-offset',
+    'topic' = '{{TRANSACTIONS_RAW_TOPIC}}',
+    'properties.bootstrap.servers' = '{{KAFKA_BOOTSTRAP_SERVERS}}',
+    'properties.group.id' = '{{KAFKA_GROUP_ID}}',
+    'properties.security.protocol' = '{{KAFKA_SECURITY_PROTOCOL}}',
+    'scan.startup.mode' = '{{KAFKA_STARTUP_MODE}}',
     'format' = 'json',
     'json.timestamp-format.standard' = 'ISO-8601',
     'json.fail-on-missing-field' = 'false',

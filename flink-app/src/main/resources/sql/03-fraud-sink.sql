@@ -13,8 +13,9 @@ CREATE TABLE fraud_alerts_sink (
     `risk_reasons` ARRAY<STRING>
 ) WITH (
     'connector' = 'kafka',
-    'topic' = 'fraud_alerts',
-    'properties.bootstrap.servers' = 'kafka:29092',
+    'topic' = '{{FRAUD_ALERTS_TOPIC}}',
+    'properties.bootstrap.servers' = '{{KAFKA_BOOTSTRAP_SERVERS}}',
+    'properties.security.protocol' = '{{KAFKA_SECURITY_PROTOCOL}}',
     'format' = 'json',
     'json.timestamp-format.standard' = 'ISO-8601'
 );
