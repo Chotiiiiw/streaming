@@ -13,8 +13,12 @@ CREATE TABLE clean_transactions_sink (
     `risk_reasons` ARRAY<STRING>
 ) WITH (
     'connector' = 'kafka',
-    'topic' = 'clean_transactions',
-    'properties.bootstrap.servers' = 'kafka:29092',
+    'topic' = '{{CLEAN_TRANSACTIONS_TOPIC}}',
+    'properties.bootstrap.servers' = '{{KAFKA_BOOTSTRAP_SERVERS}}',
+    'properties.security.protocol' = '{{KAFKA_SECURITY_PROTOCOL}}',
+    'properties.sasl.mechanism' = '{{KAFKA_SASL_MECHANISM}}',
+    'properties.sasl.jaas.config' = '{{KAFKA_SASL_JAAS_CONFIG}}',
+    'properties.sasl.client.callback.handler.class' = '{{KAFKA_SASL_CALLBACK_HANDLER}}',
     'format' = 'json',
     'json.timestamp-format.standard' = 'ISO-8601'
 );

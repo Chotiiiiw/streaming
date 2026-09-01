@@ -22,3 +22,22 @@ flink/lib/*.jar
 
 # mac
 .DS_Store
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+.terraform.tfstate.lock.info
+crash.log
+crash.*.log
+
+# Local variable values may contain account-specific configuration
+*.tfvars
+!*.tfvars.example
+
+# Local Terraform overrides
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
