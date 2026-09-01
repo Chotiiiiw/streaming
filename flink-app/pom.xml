@@ -22,8 +22,10 @@
         <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <flink.version>2.2.0</flink.version>
+        <flink.version>2.2.1</flink.version>
         <flink.kafka.version>5.0.0-2.2</flink.kafka.version>
+        <aws.kinesis.analytics.runtime.version>1.2.0</aws.kinesis.analytics.runtime.version>
+        <aws.msk.iam.auth.version>2.3.7</aws.msk.iam.auth.version>
         <junit.version>5.13.4</junit.version>
 
         <maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>
@@ -72,11 +74,26 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Supplied by the AWS Managed Service for Apache Flink runtime -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-kinesisanalytics-runtime</artifactId>
+            <version>${aws.kinesis.analytics.runtime.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- Packaged into the application JAR -->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka</artifactId>
             <version>${flink.kafka.version}</version>
+        </dependency>
+
+        <!-- IAM authentication support for Amazon MSK -->
+        <dependency>
+            <groupId>software.amazon.msk</groupId>
+            <artifactId>aws-msk-iam-auth</artifactId>
+            <version>${aws.msk.iam.auth.version}</version>
         </dependency>
 
         <dependency>

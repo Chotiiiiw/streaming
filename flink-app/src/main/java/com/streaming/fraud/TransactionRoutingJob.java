@@ -47,7 +47,7 @@ public final class TransactionRoutingJob {
         tableEnvironment.getConfig().setLocalTimeZone(ZoneId.of("UTC"));
 
         ApplicationConfig applicationConfig =
-                ApplicationConfig.fromEnvironment();
+                ApplicationConfig.load();
 
         System.out.println("Transaction routing job initialized successfully.");
         System.out.println(
@@ -205,23 +205,45 @@ public final class TransactionRoutingJob {
             ApplicationConfig config,
             String resourcePath
     ) {
-        Map<String, String> replacements = Map.of(
-                "KAFKA_BOOTSTRAP_SERVERS",
-                config.bootstrapServers(),
-                "TRANSACTIONS_RAW_TOPIC",
-                config.transactionsRawTopic(),
-                "CLEAN_TRANSACTIONS_TOPIC",
-                config.cleanTransactionsTopic(),
-                "FRAUD_ALERTS_TOPIC",
-                config.fraudAlertsTopic(),
-                "TRANSACTIONS_DLQ_TOPIC",
-                config.transactionsDlqTopic(),
-                "KAFKA_GROUP_ID",
-                config.groupId(),
-                "KAFKA_STARTUP_MODE",
-                config.startupMode(),
-                "KAFKA_SECURITY_PROTOCOL",
-                config.securityProtocol()
+        Map<String, String> replacements = Map.ofEntries(
+                Map.entry(
+                        "KAFKA_BOOTSTRAP_SERVERS",
+                        config.bootstrapServers()
+                ),
+                Map.entry(
+                        "TRANSACTIONS_RAW_TOPIC",
+                        config.transactionsRawTopic()
+                ),
+                Map.entry(
+                        "CLEAN_TRANSACTIONS_TOPIC",
+                        config.cleanTransactionsTopic()
+                ),
+                Map.entry(
+                        "FRAUD_ALERTS_TOPIC",
+                        config.fraudAlertsTopic()
+                ),
+                Map.entry(
+                        "TRANSACTIONS_DLQ_TOPIC",
+                        config.transactionsDlqTopic()
+                ),
+                Map.entry("KAFKA_GROUP_ID", config.groupId()),
+                Map.entry("KAFKA_STARTUP_MODE", config.startupMode()),
+                Map.entry(
+                        "KAFKA_SECURITY_PROTOCOL",
+                        config.securityProtocol()
+                ),
+                Map.entry(
+                        "KAFKA_SASL_MECHANISM",
+                        config.saslMechanism()
+                ),
+                Map.entry(
+                        "KAFKA_SASL_JAAS_CONFIG",
+                        config.saslJaasConfig()
+                ),
+                Map.entry(
+                        "KAFKA_SASL_CALLBACK_HANDLER",
+                        config.saslCallbackHandler()
+                )
         );
 
         String renderedSql = sqlTemplate;

@@ -1,0 +1,7 @@
+aws_region   = "us-east-1"
+aws_profile  = "streaming-learning"
+project_name = "streaming-fraud-detection"
+environment  = "learning"
+
+# Keep false until you intentionally want to start paying for Flink runtime.
+flink_start_application = false
